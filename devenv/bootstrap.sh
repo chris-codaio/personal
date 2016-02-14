@@ -84,7 +84,7 @@ if [[ $(uname) == 'Linux' ]] && which apt-get > /dev/null; then
   log info "Installing docker..."
   sudo apt-get install -qfuy docker-engine
 
-  if [[ -z $($(groups) | grep "docker") ]]; then
+  if [[ -z "$(groups | grep docker)" ]]; then
     log info "Creating docker group..."
     sudo usermod -aG docker $USER
     log pass "Docker installed"
