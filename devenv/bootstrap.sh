@@ -85,13 +85,17 @@ if [[ $(uname) == 'Linux' ]] && which apt-get > /dev/null; then
   sudo apt-get install -qfuy docker-engine
 
   if [[ -z "$(groups | grep docker)" ]]; then
-    log info "Creating docker group..."
+    log info "Adding user to docker group..."
     sudo usermod -aG docker $USER
-    log pass "Docker installed"
+    log pass "User added to group"
 
     log warn "After your next logout/login cycle, docker should work without requiring sudo access."
     log warn "Until then, you'll need to use sudo to access docker."
   fi
+
+  log info "Setting up docker hub credentials - you'll need to check 1password or ask around for the shared password."
+  sudo docker login --username krypton --email docker-admins@krypton.io
+  log pass "Docker hub access set up"
 
 elif [[ $(uname) == 'Darwin' ]]; then
   OSX_VERSION=$(sw_vers -productVersion)
@@ -100,7 +104,7 @@ elif [[ $(uname) == 'Darwin' ]]; then
   fi
 
   if [[ -z $(which brew) ]]; then
-    log info "Installing homebrew package manager..."
+    log info "Installing homebrew package manager...may require sudo permissions"
     /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     log pass "Homebrew installed"
   fi
@@ -133,6 +137,10 @@ elif [[ $(uname) == 'Darwin' ]]; then
   log info "Installing docker..."
   brew install docker
   log pass "Docker installed"
+
+  log info "Setting up docker hub credentials - you'll need to check 1password or ask around for the shared password."
+  docker login --username krypton --email docker-admins@krypton.io
+  log pass "Docker hub access set up"
 fi
 
 log pass "Bootstrap complete. Try running '[sudo] docker run -it --rm hello-world' to test your docker environment"
