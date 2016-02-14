@@ -60,8 +60,10 @@ if onLinux; then
   sudo apt-get install -qfuy linux-image-extra-$(uname -r) apparmor
   sudo apt-get install -qfuy docker-engine
 
-  echo "Starting docker..."
-  sudo service docker start
+  echo "Creating docker group..."
+  sudo usermod -aG docker $USER
+
+  echo "After your next logout/login cycle, docker should work without sudo access"
 
 elif onMacOs; then
   echo "Installing homebrew..."
@@ -73,3 +75,6 @@ elif onMacOs; then
   echo "Installing docker..."
   brew install docker
 fi
+
+echo "Testing docker install..."
+sudo docker run -it --rm hello-world
