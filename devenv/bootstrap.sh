@@ -25,7 +25,7 @@ function onMacOs() {
 
 if onLinux; then
   echo "Updating package repos..."
-  sudo apt-add-repository ppa:git-core/ppa
+  sudo apt-add-repository -y ppa:git-core/ppa
   sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 
   if lsb_release -s -d | grep -q Ubuntu; then
@@ -42,23 +42,23 @@ if onLinux; then
     DISTRO="Debian"
     RELEASE=$(lsb_release -s -c)
   fi
-  sudo add-apt-repository "deb http://apt.dockerproject.org/repo ${DISTRO,,}-${RELEASE} main"
+  sudo add-apt-repository -y "deb http://apt.dockerproject.org/repo ${DISTRO,,}-${RELEASE} main"
   
-  sudo apt-get update
+  sudo apt-get -q update
 
   echo "Installing pre-reqs..."
-  sudo apt-get install apt-transport-https ca-certificates
+  sudo apt-get install -qfuy apt-transport-https ca-certificates
 
   echo "Installing GIT 2.7.1..."
-  sudo apt-get install git
+  sudo apt-get install -qfuy git
 
   echo "Installing docker pre-reqs..."
-  sudo apt-get install cgroup-lite lxc
+  sudo apt-get install -qfuy cgroup-lite lxc
 
   echo "Installing docker..."
-  sudo apt-get purge lxc-docker
-  sudo apt-get install linux-image-extra-$(uname -r) apparmor
-  sudo apt-get install docker-engine
+  sudo apt-get purge -qfuy lxc-docker
+  sudo apt-get install -qfuy linux-image-extra-$(uname -r) apparmor
+  sudo apt-get install -qfuy docker-engine
 
   echo "Starting docker..."
   sudo service docker start
