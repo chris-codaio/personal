@@ -84,9 +84,11 @@ if [[ $(uname) == 'Linux' ]] && which apt-get > /dev/null; then
   log info "Installing docker..."
   sudo apt-get install -qfuy docker-engine
 
-  log info "Creating docker group..."
-  sudo usermod -aG docker $USER
-  log pass "Docker installed"
+  if [[ -z $($(groups) | grep "docker") ]]; then
+    log info "Creating docker group..."
+    sudo usermod -aG docker $USER
+    log pass "Docker installed"
+  fi
 
   log warn "After your next logout/login cycle, docker should work without requiring sudo access."
   log warn "Until then, you'll need to use sudo to access docker."
