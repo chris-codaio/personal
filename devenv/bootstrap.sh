@@ -64,7 +64,12 @@ if onLinux; then
   sudo service docker start
 
 elif onMacOs; then
-  # Install homebrew
-  # Install dlite
-  # Install docker
+  echo "Installing homebrew..."
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+  echo "Installing docker pre-reqs..."
+  brew install dlite
+
+  echo "Installing docker..."
+  brew install docker
 fi
