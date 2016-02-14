@@ -7,24 +7,44 @@
 
 set -eo pipefail
 
-function onLinux() {
-  if [[ $(uname) == 'Linux' ]] && which apt-get > /dev/null; then
-    return 0
-  fi
+if [[ -z "$TERM" ]]; then
+  txtdef=''
+  txtund=''
+  txtbld=''
+  bldgrn=''
+  bldred=''
+  bldblu=''
+  bldyel=''
+  bldwht=''
+  txtrst=''
+else
+  # Text color variables
+  txtdef=$(tput sgr0)
+  txtund=$(tput sgr 0 1)          # Underline
+  txtbld=$(tput bold)             # Bold
+  bldred=${txtbld}$(tput setaf 1 || true) #  red - ignore failures on non-capable terminals
+  bldgrn=${txtbld}$(tput setaf 2 || true) #  green - ignore failures on non-capable terminals
+  bldyel=${txtbld}$(tput setaf 3 || true) #  yellow - ignore failures on non-capable terminals
+  bldblu=${txtbld}$(tput setaf 4 || true) #  blue - ignore failures on non-capable terminals
+  bldwht=${txtbld}$(tput setaf 7 || true) #  white - ignore failures on non-capable terminals
+  txtrst=$(tput sgr0)             # Reset
+fi
 
-  return 1
+# usage: log([warn|error|info], message)
+function log() {
+  local txttag
+  case $1 in
+    info)  txttag=${bldwht};   shift 1 ;;
+    warn)  txttag=${bldyel};   shift 1 ;;
+    error) txttag=${bldred};   shift 1 ;;
+    pass)  txttag=${bldblu};   shift 1 ;;
+    *)     txttag=${txtdef};           ;;
+  esac
+  echo "${txttag}$(date +'%Y-%m-%dT%H:%M:%S%z') ${@}${txtdef}"
 }
 
-function onMacOs() {
-  if [[ $(uname) == 'Darwin' ]]; then
-    return 0
-  fi
-
-  return 1
-}
-
-if onLinux; then
-  echo "Updating package repos..."
+if [[ $(uname) == 'Linux' ]] && which apt-get > /dev/null; then
+  log info "Updating package repos..."
   sudo apt-add-repository -y ppa:git-core/ppa
   sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 
@@ -45,36 +65,69 @@ if onLinux; then
   sudo add-apt-repository -y "deb http://apt.dockerproject.org/repo ${DISTRO,,}-${RELEASE} main"
   
   sudo apt-get -q update
+  log pass "Package repos updated"
 
-  echo "Installing pre-reqs..."
+  log info "Installing pre-reqs..."
   sudo apt-get install -qfuy apt-transport-https ca-certificates
+  log pass "Pre-reqs installed"
 
-  echo "Installing GIT 2.7.1..."
+  log info "Installing latest GIT..."
   sudo apt-get install -qfuy git
+  log pass "GIT installed"
 
-  echo "Installing docker pre-reqs..."
-  sudo apt-get install -qfuy cgroup-lite lxc
-
-  echo "Installing docker..."
+  log info "Installing docker pre-reqs..."
   sudo apt-get purge -qfuy lxc-docker
+  sudo apt-get install -qfuy cgroup-lite lxc
   sudo apt-get install -qfuy linux-image-extra-$(uname -r) apparmor
+  log pass "Docker pre-reqs installed"
+
+  log info "Installing docker..."
   sudo apt-get install -qfuy docker-engine
 
-  echo "Creating docker group..."
+  log info "Creating docker group..."
   sudo usermod -aG docker $USER
+  log pass "Docker installed"
 
-  echo "After your next logout/login cycle, docker should work without sudo access"
+  log warn "After your next logout/login cycle, docker should work without requiring sudo access."
+  log warn "Until then, you'll need to use sudo to access docker."
 
-elif onMacOs; then
-  echo "Installing homebrew..."
-  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+elif [[ $(uname) == 'Darwin' ]]; then
+  OSX_VERSION=$(sw_vers -productVersion)
+  if [[ "$OSX_VERSION" != "10.11.3" ]]; then
+    log warn "You are running an untested version of Mac OS X"
+  fi
 
-  echo "Installing docker pre-reqs..."
+  if [[ -z $(which brew) ]]; then
+    log info "Installing homebrew package manager..."
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    log pass "Homebrew installed"
+  fi
+
+  if [[ -d "/usr/local" ]]; then
+    OWNER=$(stat -f "%Su" /usr/local)
+    if [[ "$OWNER" -ne "$USER" ]]; then
+      log info "Applying El Capitan fix for /usr/local access..."
+      sudo chown -R $(whoami):admin /usr/local
+      log pass "/usr/local fixed"
+    fi
+  fi
+
+  log info "Updating homebrew packages..."
+  brew update
+  brew upgrade
+  log pass "Homebrew packages updated."
+
+  log info "Installing latest GIT..."
+  brew install git
+  log pass "GIT installed"
+
+  log info "Installing docker pre-reqs..."
   brew install dlite
+  log pass "Docker pre-reqs installed"
 
-  echo "Installing docker..."
+  log info "Installing docker..."
   brew install docker
+  log pass "Docker installed"
 fi
 
-echo "Testing docker install..."
-sudo docker run -it --rm hello-world
+log pass "Bootstrap complete. Try running '[sudo] docker run -it --rm hello-world' to test your dev environment"
