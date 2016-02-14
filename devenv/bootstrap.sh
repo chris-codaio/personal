@@ -88,10 +88,10 @@ if [[ $(uname) == 'Linux' ]] && which apt-get > /dev/null; then
     log info "Creating docker group..."
     sudo usermod -aG docker $USER
     log pass "Docker installed"
-  fi
 
-  log warn "After your next logout/login cycle, docker should work without requiring sudo access."
-  log warn "Until then, you'll need to use sudo to access docker."
+    log warn "After your next logout/login cycle, docker should work without requiring sudo access."
+    log warn "Until then, you'll need to use sudo to access docker."
+  fi
 
 elif [[ $(uname) == 'Darwin' ]]; then
   OSX_VERSION=$(sw_vers -productVersion)
@@ -114,8 +114,11 @@ elif [[ $(uname) == 'Darwin' ]]; then
     fi
   fi
 
-  log info "Updating homebrew packages..."
+  log info "Updating homebrew..."
   brew update
+  log pass "Homebrew update complete"
+
+  log info "Upgrading installed homebrew packages"
   brew upgrade
   log pass "Homebrew packages updated."
 
@@ -132,4 +135,4 @@ elif [[ $(uname) == 'Darwin' ]]; then
   log pass "Docker installed"
 fi
 
-log pass "Bootstrap complete. Try running '[sudo] docker run -it --rm hello-world' to test your dev environment"
+log pass "Bootstrap complete. Try running '[sudo] docker run -it --rm hello-world' to test your docker environment"
