@@ -1,0 +1,30 @@
+{
+  // // Place your settings in this file to overwrite the default settings
+  // Don't re-open files in the same tab
+  "workbench.editor.enablePreview": false,
+
+  // Editor defaults
+  "window.zoomLevel": 0,
+
+  // Show path in title bar
+  "window.title": "${activeEditorLong}",
+  "workbench.iconTheme": "vscode-great-icons",
+
+  "files.autoSave": "afterDelay",
+
+  "editor.rulers": [120],
+  "editor.detectIndentation": true,
+  "editor.lineNumbers": "on",
+  "editor.scrollBeyondLastLine": false,
+
+  "javascript.validate.enable": false,
+  "tslint.enable": true,
+  "tslint.configFile": "./tslint.json",
+  "typescript.check.npmIsInstalled": false,
+  "typescript.tsserver.log": "normal",
+
+  "go.formatOnSave": false,
+  "go.gopath": "~/gowork",
+
+  "python.linting.pylintPath": "/Users/chris/src/experimental/build/coda-virtualenv/bin/pylint"
+}
